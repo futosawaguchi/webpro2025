@@ -26,12 +26,23 @@ app.get('/', async (req, res) => {
   res.render('index', { users });
 });
 
-// ユーザー追加ハンドラー: "/users" にPOSTリクエストがあったときの処理
+// ユーザー追加ハンドラー
 app.post('/users', async (req, res) => {
   const name = req.body.name; // フォームから送信された名前を取得
+  // フォームから送信された年齢を取得し、数値に変換する
+  const age = req.body.age ? Number(req.body.age) : null; 
+
+  // nameが空でなければ処理を実行
   if (name) {
+    // ageが数値でなかった場合はエラーとする(任意入力なので空は許容)
+    if (age !== null && isNaN(age)) {
+      console.error('年齢は数値でなければなりません。');
+      res.status(400).send('年齢は数値でなければなりません。');
+      return;
+    }
+    
     const newUser = await prisma.user.create({
-      data: { name },
+      data: { name, age }, // 年齢も保存
     });
     console.log('新しいユーザーを追加しました:', newUser);
   }
